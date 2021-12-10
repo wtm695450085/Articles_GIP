@@ -1,0 +1,193 @@
+https://towardsdatascience.com/support-vector-machine-simply-explained-fee28eba5496
+
+
+Towards Data Science
+
+
+Upgrade
+
+Following
+583K Followers
+·
+Editors' Picks
+Features
+Deep Dives
+Grow
+Contribute
+About
+
+
+
+
+
+
+Top highlight
+
+Support Vector Machine — Simply Explained
+The simplistic illustration of basic concepts in Support Vector Machine
+Lujing Chen
+Lujing Chen
+
+Jan 7, 2019·8 min read
+
+
+
+
+
+Photo by Malte Schmidt on Unsplash
+I was always kind of running away from the support vector machine chapter on my ML books. It is just intimidating, you know, the name, Support, Vector, Machine.
+But, it becomes less scary once I started to think of support vector machine as a “road machine”, which separates the left,right-side cars, buildings, pedestrians and makes the widest lane as possible. And those cars, buildings, really close to the street is the support vectors.
+Feeling better. Let’s get started of understanding how this “road machine” works.
+This blog covers three parts:
+What is the support vector machine
+How does it work in linear separable scenarios
+How does it work in linear non-separable scenarios
+What is Support Vector Machine (Classifier)
+
+Back to the ML world, those cars, building, pedestrians all become dots now. Red dots stand for objects on the left side of the street; green dots stand for those on the right. The street becomes dashed and solid lines.
+Support Vector Machine (the “road machine”) is responsible for finding the decision boundary to separate different classes and maximize the margin.
+Margins are the (perpendicular) distances between the line and those dots closest to the line.
+SVM in linear separable cases
+Obviously, infinite lines exist to separate the red and green dots in the example above. SVM needs to find the optimal line with the constraint of correctly classifying either class:
+Follow the constraint: only look into the separate hyperplanes(e.g. separate lines), hyperplanes that classify classes correctly
+Conduct optimization: pick up the one that maximizes the margin
+I will illustrate the concept of separate hyperplane and margin, but the explanation of solving the optimization with the constraint will not be covered in this post.
+So what is a Hyperplane?
+
+Hyperplane is an (n minus 1)-dimensional subspace for an n-dimensional space. For a 2-dimension space, its hyperplane will be 1-dimension, which is just a line. For a 3-dimension space, its hyperplane will be 2-dimension, which is a plane that slice the cube. Okay, you got the idea.
+
+Any Hyperplane can be written mathematically as above
+
+For a 2-dimensional space, the Hyperplane, which is the line.
+
+The dots above this line, are those x1, x2 satisfy the formula above
+
+The dots below this line, similar logic.
+What is a Separating Hyperplane?
+Assuming the label y is either 1 (for green) or -1 (for red), all those three lines below are separating hyperplanes. Because they all share the same property — above the line, is green; below the line, is red.
+
+This property can be written in math again as followed:
+
+If we further generalize these two into one, it becomes:
+
+Separate hyperplane constraint is written mathematically above. In the perfect scenario — linear separable scenario, this constraint can be met by SVM. But in the nonseparable scenario, we will need to loosen it.
+So what is margin?
+Let’s say we have a hyperplane — line X
+calculate the perpendicular distance from all those 40 dots to line X, it will be 40 different distances
+Out of the 40, the smallest distance, that’s our margin!
+
+The distance between either side of the dashed line to the solid line is the margin. We can think of this optimal line as the mid-line of the widest stretching we can possibly have between red and green dots.
+To sum up, SVM in the linear separable cases:
+Constrain/ensure that each observation is on the correct side of the Hyperplane
+Pick up the optimal line so that the distance from those closest dots to the Hyperplane, so-called margin, is maximized
+SVM in linear non-separable cases
+In the linearly separable case, SVM is trying to find the hyperplane that maximizes the margin, with the condition that both classes are classified correctly. But in reality, datasets are probably never linearly separable, so the condition of 100% correctly classified by a hyperplane will never be met.
+SVM address non-linearly separable cases by introducing two concepts: Soft Margin and Kernel Tricks.
+Let’s use an example. If I add one red dot in the green cluster, the dataset becomes linear nonseparable anymore. Two solutions to this problem:
+
+Soft Margin: try to find a line to separate, but tolerate one or few misclassified dots (e.g. the dots circled in red)
+Kernel Trick: try to find a non-linear decision boundary
+Soft Margin
+Two types of misclassifications are tolerated by SVM under soft margin:
+The dot is on the wrong side of the decision boundary but on the correct side/ on the margin (shown in left)
+The dot is on the wrong side of the decision boundary and on the wrong side of the margin (shown in right)
+
+Applying Soft Margin, SVM tolerates a few dots to get misclassified and tries to balance the trade-off between finding a line that maximizes the margin and minimizes the misclassification.
+Degree of tolerance
+How much tolerance(soft) we want to give when finding the decision boundary is an important hyper-parameter for the SVM (both linear and nonlinear solutions). In Sklearn, it is represented as the penalty term — ‘C’. The bigger the C, the more penalty SVM gets when it makes misclassification. Therefore, the narrower the margin is and fewer support vectors the decision boundary will depend on.
+# Default Penalty/Default Tolerance
+clf = svm.SVC(kernel='linear', C=1)
+# Less Penalty/More Tolearance
+clf2 = svm.SVC(kernel='linear', C=0.01)
+
+Kernel Trick
+What Kernel Trick does is it utilizes existing features, applies some transformations, and creates new features. Those new features are the key for SVM to find the nonlinear decision boundary.
+In Sklearn — svm.SVC(), we can choose ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’ or a callable as our kernel/transformation. I will give examples of the two most popular kernels — Polynomial and Radial Basis Function(RBF).
+
+Polynomial Kernel
+Think of the polynomial kernel as a transformer/processor to generate new features by applying the polynomial combination of all the existing features.
+To illustrate the benefit of applying a polynomial transformer, let’s use a simple example:
+
+Existing Feature: X = np.array([-2,-1,0, 1,2])
+Label: Y = np.array([1,1,0,1,1])
+it’s impossible for us to find a line to separate the yellow (1)and purple (0) dots (shown on the left).
+But, if we apply transformation X² to get:
+New Feature: X = np.array([4,1,0, 1,4])
+By combing the existing and new feature, we can certainly draw a line to separate the yellow purple dots (shown on the right).
+Support vector machine with a polynomial kernel can generate a non-linear decision boundary using those polynomial features.
+Radial Basis Function (RBF) kernel
+Think of the Radial Basis Function kernel as a transformer/processor to generate new features by measuring the distance between all other dots to a specific dot/dots — centers. The most popular/basic RBF kernel is the Gaussian Radial Basis Function:
+
+gamma (γ) controls the influence of new features — Φ(x, center) on the decision boundary. The higher the gamma, the more influence of the features will have on the decision boundary, more wiggling the boundary will be.
+To illustrate the benefit of applying a Gaussian rbf (gamma = 0.1), let’s use the same example:
+
+Existing Feature: X = np.array([-2,-1,0, 1,2])
+Label: Y = np.array([1,1,0,1,1])
+Again, it’s impossible for us to find a line to separate the dots (on left hand).
+But, if we apply Gaussian RBF transformation using two centers (-1,0) and (2,0) to get new features, we will then be able to draw a line to separate the yellow purple dots (on the right):
+New Feature 1: X_new1 = array([1.01, 1.00, 1.01, 1.04, 1.09])
+New Feature 2: X_new2 = array([1.09, 1.04, 1.01, 1.00, 1.01])
+# Note for how we get New Feature 1, e.g. 1.01:
+Φ(x1,center1) = np.exp(np.power(-(gamma*(x1-center1)),2)) = 1.01
+# gamma = 0.1
+# center1 = [-1,0]
+# x1 = [-2,0]
+Similar to the penalty term — C in the soft margin, Gamma is a hyperparameter that we can tune for when we use SVM with kernel.
+# Gamma is small, influence is small
+clf = svm.SVC(kernel='rbf', Gamma=1)
+# Gamma gets bigger, influence increase, the decision boundary get wiggled
+clf2 = svm.SVC(kernel='rbf', Gamma=10)
+# Gamma gets too big, influence too much, the decision boundary get too wiggled
+clf3 = svm.SVC(kernel='rbf', Gamma=20)
+
+To sum up, SVM in the linear nonseparable cases:
+By combining the soft margin (tolerance of misclassifications) and kernel trick together, Support Vector Machine is able to structure the decision boundary for linear non-separable cases.
+Hyper-parameters like C or Gamma control how wiggling the SVM decision boundary could be.
+the higher the C, the more penalty SVM was given when it misclassified, and therefore the less wiggling the decision boundary will be
+the higher the gamma, the more influence the feature data points will have on the decision boundary, thereby the more wiggling the boundary will be
+Finally, that’s it.
+The code for this blog can be found in my GitHub Link here.
+A good explanation/rationale of the optimization can be found in the link here, the YouTube Video by Udacity for SVM.
+Please feel free to leave any comment, question or suggestion below. Thank you!
+Lujing Chen
+Data Scientist at Amazon/ a lifelong learner
+
+Follow
+1K
+
+
+10
+
+
+Sign up for The Variable
+By Towards Data Science
+Every Thursday, the Variable delivers the very best of Towards Data Science: from hands-on tutorials and cutting-edge research to original features you don't want to miss. Take a look.
+
+Get this newsletter
+Emails will be sent to wtm695450085@gmail.com.
+Not you?
+
+1K
+
+
+10
+
+
+
+
+Machine Learning
+Svm
+Simple
+Illustration
+Python
+More from Towards Data Science
+
+Following
+Your home for data science. A Medium publication sharing concepts, ideas and codes.
+
+Read more from Towards Data Science
+About
+
+Help
+
+Legal
